@@ -62,7 +62,7 @@ connect().catch(console.dir);
 
 // --- routes ---
 app.get('/', async (_req: Request, res: Response) => {
-    res.json({ status: "success", message: 'Hello World' });
+    res.json({ status: "success", message: 'HI' });
 });
 // get all places
 app.get('/api/places', async (_req: Request, res: Response) => {
