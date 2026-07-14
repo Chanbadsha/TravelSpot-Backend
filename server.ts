@@ -7,6 +7,18 @@ import express from 'express';
 import cors from 'cors';
 
 // --- types ---
+
+interface User {
+    _id?: ObjectId;
+    name: string;
+    email: string;
+    emailVerified: boolean;
+    image: string;
+    createdAt?: string;
+    updatedAt?: string;
+    role: string;
+    banned: boolean;
+}
 interface Place {
     _id: ObjectId;
     name: string;
@@ -32,6 +44,7 @@ interface Place {
     verifiedAt: string;
     createdAt: string;
     updatedAt: string;
+    creator: User;
 }
 
 // --- module-level state ---
@@ -71,7 +84,7 @@ app.use(express.json());
 // --- routes ---
 // health check
 app.get('/', async (_req: Request, res: Response) => {
-    res.json({ status: "success", message: 'HI' });
+    res.json({ status: "success", message: 'TravelSpot API is running' });
 });
 
 // places
@@ -90,8 +103,50 @@ app.get('/api/places/:id', async (req: Request, res: Response) => {
     try {
         await connect();
         const id = req.params.id as string;
-        const data = await places.findOne({ _id: new ObjectId(id) });
+
+
+
+
+
+        const result = await places.aggregate([
+            { $match: { _id: new ObjectId(id) } },
+            {
+                $addFields: {
+                    creatorObjectId: {
+                        $toObjectId: "$creatorId"
+                    }
+                }
+            },
+            {
+                $lookup: {
+                    from: "user",
+                    localField: "creatorObjectId",
+                    foreignField: "_id",
+                    as: "creator"
+                }
+            }, {
+                $unwind: "$creator"
+            },
+            {
+                $project: {
+
+                    creatorObjectId: 0,
+                    "creator._id": 0,
+                    "creator.createdAt": 0,
+                    "creator.updatedAt": 0,
+                }
+            },
+
+
+
+        ]).toArray();
+
+        console.log(result);
+        const data = result[0];
+        // const data = await places.findOne({ _id: new ObjectId(id) });
         res.json({ status: "success", data });
+
+
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         res.status(500).json({ status: "error", message });
