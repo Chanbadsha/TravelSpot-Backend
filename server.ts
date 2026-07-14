@@ -35,7 +35,7 @@ connect().catch(console.dir);
 
 // --- routes ---
 app.get('/', async (req: Request, res: Response) => {
-    const data = await places.find({}).toArray();
+
     res.json({ status: "success", message: 'Hello World' });
 });
 
