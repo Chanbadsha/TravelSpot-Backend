@@ -198,7 +198,7 @@ app.patch('/api/users/:id', async (req: Request, res: Response) => {
         await connect();
         const id = req.params.id as string;
         const data = req.body;
-        console.log(id, data);
+
         const updatedUser = await users.updateOne({ _id: new ObjectId(id) }, { $set: data });
         res.json({ status: "success", data: updatedUser });
     } catch (error) {
@@ -244,6 +244,21 @@ app.delete('/api/users/:id', async (req: Request, res: Response) => {
         const id = req.params.id as string;
         const deletedUser = await users.deleteOne({ _id: new ObjectId(id) });
         res.json({ status: "success", data: deletedUser });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ status: "error", message });
+    }
+});
+
+// update place
+app.patch('/api/places/:id', async (req: Request, res: Response) => {
+    try {
+        await connect();
+        const id = req.params.id as string;
+        const data = req.body;
+
+        const updatedPlace = await places.updateOne({ _id: new ObjectId(id) }, { $set: data });
+        res.json({ status: "success", data: updatedPlace });
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         res.status(500).json({ status: "error", message });
