@@ -192,6 +192,22 @@ app.get('/api/users/:id', async (req: Request, res: Response) => {
 });
 
 
+// update user 
+app.patch('/api/users/:id', async (req: Request, res: Response) => {
+    try {
+        await connect();
+        const id = req.params.id as string;
+        const data = req.body;
+        console.log(id, data);
+        const updatedUser = await users.updateOne({ _id: new ObjectId(id) }, { $set: data });
+        res.json({ status: "success", data: updatedUser });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ status: "error", message });
+    }
+});
+
+
 // create place
 app.post('/api/places', async (req: Request, res: Response) => {
     try {
@@ -220,6 +236,19 @@ app.delete('/api/places/:id', async (req, res) => {
 });
 
 
+
+// delete user
+app.delete('/api/users/:id', async (req: Request, res: Response) => {
+    try {
+        await connect();
+        const id = req.params.id as string;
+        const deletedUser = await users.deleteOne({ _id: new ObjectId(id) });
+        res.json({ status: "success", data: deletedUser });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ status: "error", message });
+    }
+});
 
 // --- start server (skipped on Vercel) ---
 if (process.env.NODE_ENV !== 'production') {
