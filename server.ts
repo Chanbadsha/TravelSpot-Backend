@@ -92,6 +92,7 @@ app.get('/api/places', async (_req: Request, res: Response) => {
     try {
         await connect();
         const data = await places.find().toArray();
+
         res.json({ status: "success", data });
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
@@ -103,11 +104,6 @@ app.get('/api/places/:id', async (req: Request, res: Response) => {
     try {
         await connect();
         const id = req.params.id as string;
-
-
-
-
-
         const result = await places.aggregate([
             { $match: { _id: new ObjectId(id) } },
             {
@@ -127,6 +123,7 @@ app.get('/api/places/:id', async (req: Request, res: Response) => {
             }, {
                 $unwind: "$creator"
             },
+
             {
                 $project: {
 
@@ -141,12 +138,29 @@ app.get('/api/places/:id', async (req: Request, res: Response) => {
 
         ]).toArray();
 
-        console.log(result);
+
         const data = result[0];
         // const data = await places.findOne({ _id: new ObjectId(id) });
         res.json({ status: "success", data });
 
 
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ status: "error", message });
+    }
+});
+//  get places by user id
+app.get('/api/places/user/:id', async (req: Request, res: Response) => {
+    try {
+        await connect();
+        const id = req.params.id as string;
+
+        const result = await places.aggregate([
+            { $match: { creatorId: id } },
+        ]).toArray();
+        const data = result;
+
+        res.json({ status: "success", data });
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         res.status(500).json({ status: "error", message });
@@ -176,6 +190,35 @@ app.get('/api/users/:id', async (req: Request, res: Response) => {
         res.status(500).json({ status: "error", message });
     }
 });
+
+
+// create place
+app.post('/api/places', async (req: Request, res: Response) => {
+    try {
+        await connect();
+        const data = req.body;
+        const newPlace = await places.insertOne(data);
+        res.json({ status: "success", data: newPlace });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ status: "error", message });
+    }
+});
+
+// delete place
+app.delete('/places/:id', async (req, res) => {
+    try {
+        await connect();
+        const id = req.params.id;
+        const deletedPlace = await places.deleteOne({ _id: new ObjectId(id) });
+        res.json({ status: "success", data: deletedPlace });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ status: "error", message });
+    }
+});
+
+
 
 // --- start server (skipped on Vercel) ---
 if (process.env.NODE_ENV !== 'production') {
