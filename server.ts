@@ -226,7 +226,7 @@ app.delete('/api/places/:id', async (req, res) => {
     try {
         await connect();
         const id = req.params.id;
-        console.log(id);
+
         const deletedPlace = await places.deleteOne({ _id: new ObjectId(id) });
         res.json({ status: "success", data: deletedPlace });
     } catch (error) {
